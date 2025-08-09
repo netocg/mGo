@@ -1,0 +1,32 @@
+////////////////////////////////////////////////////////////////////////////////
+// Custom BRDF Function Library Extension Registration
+// Copyright (c) 2014 Antonio Lisboa M. Neto. All Rights Reserved.
+//////////////////////////////////////////////////////////////////////////////// 
+// File: BRDF_FunctionLib_ext.glslc	
+// Description: Function Library Extension for be used in the new Custom BRDF Shaders
+////////////////////////////////////////////////////////////////////////////////               	
+// Author: Antonio Neto       	
+// Web: www.netocg.blogspot.com			
+// Email: netocg.fx@gmail.com
+////////////////////////////////////////////////////////////////////////////////			                                   	
+// Date: Jan 25, 2014	         		
+////////////////////////////////////////////////////////////////////////////////
+
+float att(vec3 L, int Light_Falloff, float Decay_Rate);
+vec3 sRGB_toLinear(vec3 LinearColor);
+float color_toValue(vec3 Color);
+vec3 pow_RGB(vec3 Color, float Value);
+float mriBRDF_Fresnel(vec3 L, vec3 H, float eta);
+float mriBRDF_Fresnel_Complex_Term(vec3 L, vec3 H, float eta, float k);
+float mriBRDF_Schlicks(vec3 L, vec3 H, float _Reflectance);
+float mriBRDF_Oren_Nayar(vec3 N, vec3 V, vec3 L, float difrough2);
+float mriBRDF_Beckman(vec3 N, vec3 H, float specrough2);
+float mriBRDF_Geo_att_Cook_Torrance(vec3 N, vec3 H, vec3 V, vec3 L);
+float mriBRDF_Ward(vec3 N, vec3 V, vec3 L, vec3 H, vec3 X, vec3 Y, float ani, float specrough2);
+float mriBRDF_Geo_att_Ward_Duer( vec3 L, vec3 V, vec3 N, vec3 H);
+float mriBRDF_Ashikhmin_Shirley( vec3 N, vec3 V, vec3 L, vec3 H, vec3 X, vec3 Y, float ani, float rot, float specrough2);
+float mriBRDF_Geo_Att_Ash_Sh00( vec3 N, vec3 V, vec3 L);
+float mriBRDF_Blinn(vec3 N, vec3 H, float specrough2);
+float mriBRDF_Geo_att_Schlick_Smith(vec3 N, vec3 L, vec3 V, float specrough2);
+float mriBRDF_Phong(vec3 N, vec3 V, vec3 H, float specrough2);
+float mriBRDF_Geo_att_Beckmann(vec3 N, vec3 V, float specrough2);

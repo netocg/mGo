@@ -1,0 +1,315 @@
+////////////////////////////////////////////////////////////////////////////////
+// Custom BRDF Function Library Extension Registration
+// Copyright (c) 2014 Antonio Lisboa M. Neto. All Rights Reserved.
+//////////////////////////////////////////////////////////////////////////////// 
+// File: BRDF_FunctionLib_ext.glslc	
+// Description: Function Library Extension for be used in the new Custom BRDF Shaders
+////////////////////////////////////////////////////////////////////////////////               	
+// Author: Antonio Neto       	
+// Web: www.netocg.blogspot.com			
+// Email: netocg.fx@gmail.com
+////////////////////////////////////////////////////////////////////////////////			                                   	
+// Date: Jan 25, 2014	         		
+////////////////////////////////////////////////////////////////////////////////
+
+#version 150
+//! include | BRDF_FunctionLib_ext.glslh
+
+const float PI = 3.14159265358979323846;
+const float TwoPI = 2.0*PI;
+
+
+// Light Attenuation 
+float att(vec3 L, int Light_Falloff, float Decay_Rate)
+{			
+	float dist = length(L);	
+	float Light_Att = 1.0;	
+	if(Light_Falloff == 1)
+	{		
+		Light_Att = 1.0/(Decay_Rate*dist);	
+	}
+	if(Light_Falloff == 2)
+	{				
+		Light_Att = 1.0/(Decay_Rate*Decay_Rate*dist*dist);	
+	}
+	return Light_Att;
+}
+
+// Convert sRGB colors to Linear
+vec3 sRGB_toLinear(vec3 LinearColor)
+{
+    // If the input pixels are treated as sRGB, we want to
+    // convert to linear before lighting calculations, or 
+    // the shaded result will be wrong
+    for (int i=0; i<3; ++i)
+    {
+        LinearColor[i] = LinearColor[i] > 0.04045 ? pow((LinearColor[i]+0.055)/1.055, 2.4) : LinearColor[i] / 12.92;
+    }
+	return LinearColor;	
+}
+		
+// Convert RGB colors to avg greyscale float.
+float color_toValue(vec3 Color)
+{
+	float _greyscale = (Color.r + Color.g + Color.b)/3;
+	return _greyscale;
+}
+
+// Calculates the power of a RGB variable.
+vec3 pow_RGB(vec3 Color, float Value)
+{
+	vec3 _pow = vec3( max(0.0, pow(Color.r, Value)), max(0.0, pow(Color.g, Value)), max(0.0, pow(Color.b, Value)) );
+	return _pow;
+}
+
+
+//Fresnel Term - uses the Index of Refraction Equation
+float mriBRDF_Fresnel(vec3 L, vec3 H, float eta)
+{		
+	float F0 = (1 - eta)/(1 + eta);	
+	F0 = F0*F0;
+	float LdotH = dot(L,H);
+	float F = F0+(1.0-F0)*pow(1-LdotH,5.0);
+	return F;
+}
+
+float mriBRDF_Fresnel_Complex_Term(vec3 L, vec3 H, float eta, float k)
+{		
+	float F0 = (1 - eta);	
+	F0 = F0*F0;
+	float LdotH = dot(L,H);
+	float F = F0 + 4*eta*pow(1-LdotH,5.0) + k*k;	
+	F /= (1 + eta)*(1 + eta) + k*k;
+	return F;
+}
+
+// Fresnel - Schlicks used in Arnold reflectance at normal
+float mriBRDF_Schlicks(vec3 L, vec3 H, float _Reflectance)
+{
+	float r = _Reflectance;
+	float LdotH = dot(L,H);
+	float F = r + ((1-r) * pow( 1.0-LdotH, 5.0));
+	return F;
+}
+
+
+// Oren-Nayar code for diffuse roughness 
+float mriBRDF_Oren_Nayar(vec3 N, vec3 V, vec3 L, float difrough2) 
+{
+	// Oren-Nayar Diffuse Lighting code
+	// calculate intermediary values
+	float NdotV = dot(N,V);
+	float LdotN = dot(L,N);	
+	float angleVN = acos(NdotV);
+	float angleLN = acos(LdotN);
+	float alpha = max(angleVN, angleLN);
+	float beta = min(angleVN, angleLN);
+	float angleDifference = max(dot( normalize(V - N * NdotV), normalize(L - N * LdotN ) ),0.0); // Some people call angleDifference as gamma, cos_phi_diff... 
+	float C1 = 1.0 - 0.5 * (difrough2 / (difrough2 + 0.33));
+	float C2 = 0.45 * (difrough2 / (difrough2 + 0.09));
+	
+	if(angleDifference >= 0.0)
+			{
+				C2 *= sin(alpha);
+			}
+			else
+			{
+				C2 *= (sin(alpha) - pow((2.0 * beta) / PI, 3.0));
+			}
+				 
+			float powValue = (4.0 * alpha * beta) / (PI * PI);
+			float C3  = 0.125 * (difrough2 / (difrough2 + 0.09) ) * powValue * powValue;
+
+			// now calculate both main parts of the formula
+			float A = angleDifference * C2 * tan(beta);
+			float B = (1.0 - abs(angleDifference)) * C3 * tan((alpha + beta) / 2.0);
+						
+			// put it all together
+			float L1 = max(0, LdotN) * (C1 + A + B);
+					
+			// also calculate interreflection 
+			float L2 = 0.17 * max(0, LdotN) * (difrough2 / (difrough2 + 0.13) ) * (1.0 - angleDifference * (4*beta*beta)/(PI*PI));
+				
+			// get the final color by summing both components
+			return (L1 + L2); 
+}
+
+
+//Beckman BRDF Specular Reflection Lighting code for Cook-Torrance shader
+float mriBRDF_Beckman(vec3 N, vec3 H, float specrough2)
+{
+	float NdotH = dot(N,H);
+	float NdotH2 = NdotH*NdotH;	
+	float D = exp(-(1-NdotH2)/NdotH2/specrough2) / (4.0*specrough2*NdotH2*NdotH2);	
+	return D;
+}
+
+//Geometric attenuation by Cook Torrance
+float mriBRDF_Geo_att_Cook_Torrance(vec3 N, vec3 H, vec3 V, vec3 L)
+{
+	float LdotH = dot(L,H);
+	float VdotH = dot(V,H);
+	float NdotH = dot(N,H);
+	float NdotV = dot(N,V);
+	float LdotN = dot(L,N);	
+	float G = min(1.0, min(2.0*NdotH*NdotV/VdotH, 2.0*NdotH*LdotN/VdotH) );		  
+	return G;
+}
+
+
+// Ward BRDF
+// this is the formulation specified in "Notes on the Ward BRDF" - Bruce Walter, 2005, I tweaked to match better I beleave
+float mriBRDF_Ward( vec3 N, vec3 V, vec3 L, vec3 H, vec3 X, vec3 Y, float ani, float specrough2)
+{   	 
+	// specular
+	float _aniX = 0.0;
+	float _aniY = 0.0;
+	float _ani = abs(ani);
+	if (ani > 0.0)
+	{
+		_aniX = 1.0-_ani/2;
+	}
+	if (ani < 0.0)
+	{
+		_aniY = 1.0-_ani/2;
+	}
+		
+	// when there is not enough blur it start to considerer as an isotropy.
+	// Apply a small bias to the roughness
+	float _isotropy = mix((specrough2+1)*_ani, _ani, _ani)*clamp(1-specrough2, 0.02, 0.2)*5;
+    float ax = mix(1.0-specrough2, _aniX, _isotropy ); 
+	float ay = mix(1.0-specrough2, _aniY, _isotropy ); 
+	ax = clamp(ax, 0.001, 0.999);
+	ay = clamp(ay, 0.001, 0.999);	
+    
+	//Anisotropy Calculations
+	float LdotN = dot(L,N);
+	float NdotV = dot(N,V);
+	float NdotH = dot(N,H);
+	float NdotH2 = NdotH * NdotH;
+	float HdotX2 = (dot(H,X)/ax) * (dot(H,X)/ax); 
+	float HdotY2 = (dot(H,Y)/ay) * (dot(H,Y)/ay);	
+		
+	
+	// specular calculations, different formulas for Ward, since the paper get 2updates over the years.		
+	float exponent = -(HdotX2 + HdotY2)/NdotH2; // Ward 2005 formula - works better as isotropic equals roughness in x and y directions.
+	float spec_isotropy = ( 1.0/sqrt(LdotN*NdotV) )*( exp(exponent)/(4.0*PI*ax*ay) ); 
+	
+	exponent = -2.0*(HdotX2 + HdotY2)/(1.0 + NdotH); // Ward 2010 formula - works better as anisotropic 	
+	float spec_anisotropy = ( 1.0/sqrt(LdotN*NdotV) )*( exp(exponent)/(4.0*PI*ax*ay) ); 
+		
+	float D = mix(spec_isotropy, spec_anisotropy, _isotropy);
+    return D;
+}	
+
+// Geometric Attenuation by Ward-Duer
+float mriBRDF_Geo_att_Ward_Duer( vec3 L, vec3 V, vec3 N, vec3 H)
+{	
+    float G = dot(H,H) * pow(dot(N,H),-4);
+	G = pow( G, -0.5);
+    return G;
+}
+
+
+//  BRDF - Ashikhmin Shirley 2000 - Anisotropic phong reflectance model
+float mriBRDF_Ashikhmin_Shirley( vec3 N, vec3 V, vec3 L, vec3 H, vec3 X, vec3 Y, float ani, float rot, float specrough2)
+{   	
+	//Anisotropy Calculations	
+	float HdotX = dot(H,X); 
+	float HdotY = dot(H,Y);	
+	float NdotH = dot(N,H);
+	float HdotL = dot(H,L);
+	float LdotN = dot(N,L);
+	float NdotV = dot(N,V);
+	float HdotV = dot(H,V);		
+	
+	// Compute the specular term	
+	float exp = exp2( mix(2,19, specrough2) );
+	float ax = exp;
+	float ay = exp;
+	float _ani = abs(ani);
+	if (ani < 0.0)
+	{
+		ax = exp2( mix(2,19, specrough2 - _ani) );
+		ax = mix(exp, ax, min(specrough2*9,1) );
+	}
+	if (ani > 0.0)
+	{
+		ay = exp2( mix(2,19, specrough2 - _ani) );
+		ay = mix(exp, ay, min(specrough2*9,1) );
+	}
+	
+	float c = sqrt((exp+1)*(exp+1))/(8*PI);		
+	float n = ani == 0 ? exp : (ax*HdotX*HdotX + ay*HdotY*HdotY) /(1-NdotH*NdotH);
+	float spec =  c * ( pow(max(0,NdotH), n) / (HdotV * max(NdotV, LdotN)) );		
+
+	float D = spec;	
+    return D;
+}
+
+float mriBRDF_Geo_Att_Ash_Sh00( vec3 N, vec3 V, vec3 L)
+{
+	vec3 H = normalize(L+V);
+    float LdotN = dot(L, N);
+    float NdotV = dot(N, V);
+	float HdotL = dot(H, L);	
+	float G = LdotN*NdotV/(HdotL * max(LdotN, NdotV)); // G factor from as00
+	//G *= (LdotN*NdotV);
+	if (LdotN < 0 || NdotV < 0) 
+	{
+		G = 0.0;
+	}	
+	
+	return G;
+}
+
+
+// Microfacet - Blinn
+float mriBRDF_Blinn(vec3 N, vec3 H, float specrough2)
+{	 
+	float NdotH = dot(N,H);
+	float m = exp2( 13*specrough2);	
+	//blinn of blinn-phong possibilities to be used (m+2.0), (m+4.0) or (m+2.0)*(m+4.0)	
+    float D = ( (m+1.0)/(2*PI) ) * pow( max(0, NdotH), m);
+
+	return D;	
+}	
+	
+// Geometric Attenuation by Schlick-Smith
+float mriBRDF_Geo_att_Schlick_Smith(vec3 N, vec3 L, vec3 V, float specrough2)
+{   
+	float LdotN = dot(N,L);
+	float NdotV = dot(N,V);	
+	float m = exp2( 10.0*specrough2+1);
+	float a = 1.0 / sqrt( ((PI/4.0) * m) + (PI/2.0));
+    float G = 1.0 / (((1.0 - a )*LdotN) + a) * ((NdotV*(1.0-a))+ a);
+	
+	return G;
+}
+
+
+// Microfacet - Phong
+float mriBRDF_Phong(vec3 N, vec3 V, vec3 L, float specrough2)
+{
+	vec3 R = 2.0*dot(L,N)*N - L;
+	float VdotR = dot(V,R);
+	//phong possibilities to be used (m+8)/(8*PI)
+	float m = exp2( 10*specrough2+1);	
+	float D = ((m+2)/(2*PI)) * pow(max(0, VdotR), m);
+	
+	return D;	
+}
+
+// Geometric Attenuation by Beckmann
+float mriBRDF_Geo_att_Beckmann(vec3 N, vec3 V, float specrough2)
+{   	
+	float NdotV = dot(N,V);
+	float G = 1.0;
+	float c = NdotV / (specrough2 * sqrt(1 - NdotV*NdotV) );
+	if(c < 1.6)
+	{
+		G = (3.535*c + 2.181*c*c) / (1 + 2.276*c + 2.577*c*c);
+	}	
+	
+	return G;
+}
