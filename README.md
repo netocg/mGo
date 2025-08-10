@@ -1,4 +1,5 @@
-mGo! - Mari to Maya Shader Exportor (Beta)
+mGo! - Mari 3.2 to Maya 2015 Bridge tool
+https://youtu.be/cE-eKhWPLz4
 
 Works in conjunction with Custom Mari Shaders by Antonio Neto. 
 
