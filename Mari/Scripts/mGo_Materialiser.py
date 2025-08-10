@@ -15,7 +15,7 @@
 #
 #-----------------------------------------------------------------
 
-import mari
+import Mari
 import os
 import pickle
 import PySide2
@@ -27,10 +27,10 @@ gui = PySide2.QtGui
 		
 def runMaterialiser():
 	# Mari Paths
-	mariPath=mari.resources.path('MARI_USER_PATH')
+	mariPath=Mari.resources.path('MARI_USER_PATH')
 	mariPath = mariPath.replace( "\\", "/" ).rstrip( "/" )
 		
-	userPath=mari.resources.path('MARI_USER_PATH')
+	userPath=Mari.resources.path('MARI_USER_PATH')
 	userPath = userPath.replace( "\\", "/" ).rstrip( "/" )
 	materialiserDir = userPath + "/mGo/Presets"
 		
@@ -127,14 +127,14 @@ def runMaterialiser():
         button_layout = widgets.QHBoxLayout()
 	
         save_button = widgets.QPushButton("Save")
-        save_button_icon = gui.QIcon(mari.resources.path(mari.resources.ICONS) + '/SaveFile.png')
+        save_button_icon = gui.QIcon(Mari.resources.path(Mari.resources.ICONS) + '/SaveFile.png')
 	save_button.setToolTip('Saves attributes of current shader to file. Choose or create a new folder (as a new Library) inside mGo/Presets Directory.')
 	save_button.setIcon(save_button_icon)
 	
-	mari.utils.connect(save_button.clicked, lambda: saveFile())
+	Mari.utils.connect(save_button.clicked, lambda: saveFile())
 	
         add_channels = widgets.QPushButton("Add Channels")
-        add_channels_icon = gui.QIcon(mari.resources.path(mari.resources.ICONS) + '/AddChannel.png')
+        add_channels_icon = gui.QIcon(Mari.resources.path(Mari.resources.ICONS) + '/AddChannel.png')
 	add_channels.setIcon(add_channels_icon)
 	add_channels.setToolTip("Select entries from the Inputs list that you would like to add as Channels. Channels are created with values taken from the relevant Attribute in the Preset.")
 		
@@ -265,7 +265,7 @@ def runMaterialiser():
 		
 	
 	# set function for combobox indexchange
-	if mari.projects.current() != None:
+	if Mari.projects.current() != None:
 		shaderType_combo.activated[int].connect(lambda: update_shaderType())
 		library_combo.activated[int].connect(lambda: update_subDir())
 		presets_combo.activated[int].connect(lambda: previewFile())
@@ -288,7 +288,7 @@ def runMaterialiser():
 	curShaderStr = []	
 	newShader = []
 	global geo
-	geo = mari.geo.current()
+	geo = Mari.geo.current()
 
 	# Somtimes the layered Shader UI doesn't update, displaying the sliders of the newest current selected shader created.
 	def layeredShader_update_UI_list():
@@ -628,7 +628,7 @@ def runMaterialiser():
 			val1=float(aColor[0])
 			val2=float(aColor[1])
 			val3=float(aColor[2])			
-			aColor = mari.Color(val1, val2, val3)
+			aColor = Mari.Color(val1, val2, val3)
 			
 			return aColor;
 		
@@ -677,11 +677,11 @@ def runMaterialiser():
 			linearChannels = ['DiffuseAmount', 'DiffuseWeight', 'diffuse_weight', 'DiffuseRoughness', 'Backlighting', 'refr_trans_weight', 'SpecularWeight', 'SpecularRoughness', 'Anisotropy', 'Rotation', 'Reflectance', 'reflReflectance', 'Reflection_IOR', 'ReflectionAmount', 'RefractionRoughness', 'HighlightGlossiness', 'ReflectionGlossiness', 'RefractionAmount', 'transparency', 'RefractionGlossiness', 'SSSWeight', 'IOR', 'diffuse_roughness', 'refl_weight', 'refl_base_weight', 'brdf_0_degree_refl', 'brdf_base_0_degree_refl', 'refl_gloss', 'refl_base_gloss', 'anisotropy', 'anisotropy_rotation', 'refr_gloss', 'refr_ior', 'Bump', 'Normal', 'Displacement']
 			for linearChannel in linearChannels:
 				if input_channel == linearChannel:
-					curChan = mari.current.channel()
+					curChan = Mari.current.channel()
 					curConfig = curChan.colorspaceConfig()
 
 					# MODIFYING OUTPUT STAGE OF CHANNELS COLOR SPACE CONFIG
-					curConfig.setColorspace(mari.ColorspaceConfig.COLORSPACE_STAGE_NATIVE,'linear')
+					curConfig.setColorspace(Mari.ColorspaceConfig.COLORSPACE_STAGE_NATIVE, 'linear')
 
 					curChan.setColorspaceConfig(curConfig)			
 			
@@ -689,7 +689,7 @@ def runMaterialiser():
 		
 		
 		# Pass the signal that the old shader has to be Killed instead of just update!
-		geo = mari.geo.current()
+		geo = Mari.geo.current()
 		curShader = geo.currentShader()
 		# Avoid issues if you don't have any shader selected! It happen when you delete shaders too fast!!!
 		killed_curShaderStr = []		
@@ -742,8 +742,8 @@ def runMaterialiser():
 		# Check if the Shader is just going to be update or if it need to be created. If the shader has been killed go create a new one!
 		if (update_previewShader == "True") and (shaderKilled == "False"):
 			#If the geo has changed in the middle of the process then update the variable 'geo' to the new geo selected
-			if geo != mari.geo.current():
-				geo = mari.geo.current()
+			if geo != Mari.geo.current():
+				geo = Mari.geo.current()
 				update_previewShader = "False"
 				shaderKilled = "False"
 				curShader = create_newShader(shaderType)
@@ -1196,8 +1196,8 @@ def runMaterialiser():
 
 		
 		#Enable add_channels Button
-		mari.utils.connect(add_channels.clicked, lambda: add_channels_toShader())
-		mari.utils.connect(inputs_list.clicked, lambda: check_inputSelected())
+		Mari.utils.connect(add_channels.clicked, lambda: add_channels_toShader())
+		Mari.utils.connect(inputs_list.clicked, lambda: check_inputSelected())
 		# Enable the add_channels button if there is at least 1 item selected in the list. Else disable it.
 		def check_inputSelected():
 			selected_itemsCount = 0
@@ -1242,7 +1242,7 @@ def runMaterialiser():
 						# get the value from the RGB Color Swatch or an attribute slider
 						aParameter = curShader.getParameter(item.text())
 						# Convert the float slider into RGB Color attribute
-						aParameter = mari.Color(aParameter, aParameter, aParameter)
+						aParameter = Mari.Color(aParameter, aParameter, aParameter)
 					except:
 						pass
 						
@@ -1253,7 +1253,7 @@ def runMaterialiser():
 					
 					# We have to give the parameters for Bump Manually. The Input name Bump does not correlate to any shader slider parameter.
 					if item.text() == "Bump":						
-						aParameter = mari.Color(0.5, 0.5, 0.5)						
+						aParameter = Mari.Color(0.5, 0.5, 0.5)
 					
 					# Call a definition that is responsible to create the channels with base colors layers					
 					create_channels(curShader, item.text(), chanRes, bitDepth, aParameter, curShaderStr, killed_curShaderStr)
@@ -1573,11 +1573,11 @@ def runMaterialiser():
 
 def importShader(myFileName, shader_file, sendMode):
 	try:
-		mari.geo.setCurrent(myFileName)
+		Mari.geo.setCurrent(myFileName)
 	except:
 		print("You are trying to update a shader of a mesh which doesn't exist in the project. No '" +myFileName+ "' found.")
 		return
-	geo = mari.geo.current()
+	geo = Mari.geo.current()
 	pathfile = shader_file
 	#Open the preset file select
 	with open(pathfile, 'r') as f:
@@ -1730,7 +1730,7 @@ def importShader(myFileName, shader_file, sendMode):
 		val1=float(aColor[0])
 		val2=float(aColor[1])
 		val3=float(aColor[2])			
-		aColor = mari.Color(val1, val2, val3)
+		aColor = Mari.Color(val1, val2, val3)
 		
 		return aColor;
 	

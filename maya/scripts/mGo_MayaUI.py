@@ -573,7 +573,7 @@ def sendObjToMari(*args):
         elif(shaderType == "RedshiftArchitectural"):
             shaderTypeFolder = "Redshift"
         else:
-            print("no supported shader assigned to the mesh, skip sending the shader to mari.")
+            print("no supported shader assigned to the mesh, skip sending the shader to Mari.")
             print("Assigned shader: '" +shader+ "', node type: '" +shaderType+ "'")
             return "none"
         
@@ -617,13 +617,13 @@ def sendObjToMari(*args):
     #what's channelRes?
     setR=cmds.optionMenu("chanRes", q=True, v=True)
 
-    #query whether object is to be sent to new mari project, added to current, or added as new version to current
+    #query whether object is to be sent to new Mari project, added to current, or added as new version to current
     sendMode=cmds.radioButtonGrp("sendOptions", q=True, sl=True)
 
     #take projectName from either textfield or projectMenu (depending on sendMode)
     if sendMode==1:
         print("New project.")
-        #query the typed mari project name
+        #query the typed Mari project name
         projectName=cmds.textField("projectName", text = True, q = True)
         if not os.path.exists(assetsPath + "/" + projectName):
             print("making new path")
@@ -651,7 +651,7 @@ def sendObjToMari(*args):
             
         #Initial the creation project in Mari.
         if sendMode==1:
-            mari.send('mari.examples.mGo.importGEO("%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s")\x04' % (sendMode, projectName, "initialCreation", "initialCreation", setR, sd, isAnim, startAnim, endAnim, "initialCreation", "initialCreation", "initialCreation", "initialCreation", False, False, "none"))
+            mari.send('Mari.Scripts.mGo.importGEO("%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s")\x04' % (sendMode, projectName, "initialCreation", "initialCreation", setR, sd, isAnim, startAnim, endAnim, "initialCreation", "initialCreation", "initialCreation", "initialCreation", False, False, "none"))
             mari.close()
             sendMode=2
             mari = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -803,7 +803,7 @@ def sendObjToMari(*args):
                 maya.mel.eval(('FBXExport -f \"{}\" -s').format(filePath))
                     
             #Function inside mGo - Mari that is responsible to manage the import process of an asset from Maya to Mari.
-            mari.send('mari.examples.mGo.importGEO("%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s")\x04' % (sendMode, projectName, nameSpace, groups, filePath, setR, sd, isAnim, startAnim, endAnim, nameSpace+currentMesh, myFileName, meshData, sendShader, shadersOnly, shader_file))
+            mari.send('Mari.Scripts.mGo.importGEO("%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s")\x04' % (sendMode, projectName, nameSpace, groups, filePath, setR, sd, isAnim, startAnim, endAnim, nameSpace+currentMesh, myFileName, meshData, sendShader, shadersOnly, shader_file))
             #after create the project for the first time switch the send Object mode to the add GEO method.
             
         mari.close()
@@ -1126,11 +1126,11 @@ def send_hdri_to_mari(*args):
         else:
             #load the HDRI in Mari and set attributes
             mari.send('project_name = "%s"\x04' % project_name)
-            mari.send('if mari.projects.current().name() != project_name:\n    mari.projects.close()\x04')
-            mari.send('if (mari.projects.current() == None):\n try:\n    mari.projects.open(project_name)\n except:\n    print("ERROR - The project does not exist!")\x04')
+            mari.send('if Mari.projects.current().name() != project_name:\n    Mari.projects.close()\x04')
+            mari.send('if (Mari.projects.current() == None):\n try:\n    Mari.projects.open(project_name)\n except:\n    print("ERROR - The project does not exist!")\x04')
             mari.send('oldHDR=None\x04')
-            mari.send("myEnvLight=next(x for x in mari.lights.list() if x.isEnvironmentLight())\x04")
-            mari.send("oldHDR = [i for i in mari.images.list() if i.filePath() == myEnvLight.cubeImageFilename()]\x04")
+            mari.send("myEnvLight=next(x for x in Mari.lights.list() if x.isEnvironmentLight())\x04")
+            mari.send("oldHDR = [i for i in Mari.images.list() if i.filePath() == myEnvLight.cubeImageFilename()]\x04")
             mari.send("if oldHDR:\n    oldHDR[0].close()\x04")
             mari.send("myEnvLight.setCubeImage( '%s', myEnvLight.TYPE_GUESS)\x04" % final_path)
             mari.send("myEnvLight.setCanvasDisplay( True)\x04")
@@ -1182,7 +1182,7 @@ def exportCam(*args):
         startTime = "StartFrame = " + StartFrame
         endTime = "EndFrame = " + EndFrame
 
-        #query the selected mari project name
+        #query the selected Mari project name
         projectName=cmds.optionMenu("projectMenu", q=True, v = True)
 
         if not os.path.exists(assetsPath + "/" + projectName):
@@ -1207,7 +1207,7 @@ def exportCam(*args):
         try:
             mari = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             mari.connect((mariHost, 6100))
-            mari.send('mari.examples.mGo.importCAM("%s", "%s", "%s", "%s")\x04' % (projectName, startTime, endTime, camFileName) )
+            mari.send('Mari.Scripts.mGo.importCAM("%s", "%s", "%s", "%s")\x04' % (projectName, startTime, endTime, camFileName) )
             mari.close()
             #show message
             cmds.inViewMessage( amg="Cameras sent to Mari", pos='botCenter', fade=True, fadeOutTime=500 )
@@ -1533,7 +1533,7 @@ def getProjects(*args):
     try:
         mari = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         mari.connect((mariHost, 6100))
-        mari.send('mari.examples.mGo.getProjects("%s", "%s")\x04' % (ipConnection, mGoPath) )
+        mari.send('Mari.Scripts.mGo.getProjects("%s", "%s")\x04' % (ipConnection, mGoPath) )
         mari.close()
         mariOpen=True
     except:
@@ -1542,7 +1542,7 @@ def getProjects(*args):
         print("Failed to establish a connection with Mari to update Mari Projects List... Please launch Mari and enable Port 6100")
 
     try:
-        #get the mari projects list and populate Projects Menu
+        #get the Mari projects list and populate Projects Menu
         mariProjs = open(mGoPath +"/"+ 'mariProjects.txt', 'r')
         getProjs= mariProjs.read()
         mariProjs.close()
@@ -1777,7 +1777,7 @@ def newAddress(*args):
                 for item in allHosts:
                     cmds.deleteUI(item)
 
-            #reading the mari host addresses from mariHosts.txt
+            #reading the Mari host addresses from mariHosts.txt
             with open(filepathHosts) as rd:
                 items = rd.readlines()
 

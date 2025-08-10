@@ -12,7 +12,7 @@
 #
 #-----------------------------------------------------------------
 
-import mari
+import Mari
 from . import mGo
 
 def reload_mGo():
@@ -27,7 +27,7 @@ reload_mGo()
 # Launches mGo palette from the (Shift+4) Shortcut
 def starts_mGo():
 	reload_mGo()
-	mari.examples.mGo.run_mGo()
+	Mari.examples.mGo.run_mGo()
 
 # ------------------------------------------------------------------------------
 	
@@ -46,7 +46,7 @@ def checkInputs(curShader, curChannel):
 				
 				# If 'yes', store the input name.
 				_inputName = input_channel[0]
-				print("The current selected channel: '" +curChannel+ "' from the geo: '" +mari.geo.current().name()+ "' is assigned to the Input:'" +_inputName+ "' of the shader: '" +curShader.name()+ "'")
+				print("The current selected channel: '" + curChannel + "' from the geo: '" + Mari.geo.current().name() + "' is assigned to the Input:'" + _inputName + "' of the shader: '" + curShader.name() + "'")
 				return _inputName;
 				
 		except:
@@ -82,7 +82,7 @@ def syncChannels():
 
 	print("--------------------------------------------------------------------")
 	print("Synchronize Channels Selected - Shortcut Action(Shift+1)")
-	geo = mari.geo.current()
+	geo = Mari.geo.current()
 	old_curShader = geo.currentShader()
 	curChannel = geo.currentChannel().name()	
 
@@ -103,7 +103,7 @@ def syncChannels():
 		return
 	
 	# Go on each geo on the project.
-	for curGeoIteration in mari.geo.list():
+	for curGeoIteration in Mari.geo.list():
 		print("---------------")
 		# Select the current Geo Iteration from the Loop, and check/select the current selected shader from that geo.
 		curGeoIteration.setSelected(True)		
@@ -149,7 +149,7 @@ _RESET_SHADERS = {}
 def isolateCurrentShader():
 	global _RESET_SHADERS
 	
-	geo = mari.geo.current()
+	geo = Mari.geo.current()
 	
 	# Avoid overwritten the var registers if it has some info different from it's default value. 
 	if _RESET_SHADERS != {}:
@@ -170,7 +170,7 @@ def isolateCurrentShader():
 			
 			print("Shader: '" +shader_interation.name()+ "'")
 			print("Visibility: '" + str(shaderVisibility)+ "'")
-			print("Blend Mode: '" +mari.Layer.blendModeName(blendMode)+ "'")
+			print("Blend Mode: '" + Mari.Layer.blendModeName(blendMode) + "'")
 			print("Blend Amount: '" + str(blendAmount)+ "'")			
 			
 			# Turn of any shader in the layered shader list that is not selected
@@ -179,7 +179,7 @@ def isolateCurrentShader():
 				print("Turning him off!")
 			else:
 				# Set the selected shader to normal, and blend amount 1.0 in order to easily work with him whithout any blending effect.
-				shader_interation.setBlendMode(mari.Layer.MIX)
+				shader_interation.setBlendMode(Mari.Layer.MIX)
 				shader_interation.setBlendAmount(1.0)
 				print("Set the Blend Mode to Normal, and Blend Amount to 1.0")
 			
@@ -215,37 +215,37 @@ def isolateReset():
 def mGoHelp():
 	"Launches mGo documentation"
 
-	filePath = mari.resources.path(mari.resources.HELP) + '/mGoManual.pdf'
-	mari.resources.showPDF(filePath)
+	filePath = Mari.resources.path(Mari.resources.HELP) + '/mGoManual.pdf'
+	Mari.resources.showPDF(filePath)
 
 # Only set up menu entries and connections is the application is running.
 def _createMenu():
 	# Register new Shortcut actions with the action manager, and add it to a Python Menu under the mGo group
 	UI_path = 'MainWindow/P&ython/&Examples/mGo'
 
-	action1 = mari.actions.create('Open mGo Palette             Shift+4', "mari.examples.mGo_Shortcut_Actions.starts_mGo()")
-	mari.menus.addAction(action1, UI_path)
+	action1 = Mari.actions.create('Open mGo Palette             Shift+4', "Mari.Scripts.mGo_Shortcut_Actions.starts_mGo()")
+	Mari.menus.addAction(action1, UI_path)
 	action1.setShortcut('Shift+4')
 	action1.setShortcut('Shift+$') #linux compatibility
 
-	action2 = mari.actions.create('Synchronize Channels Selected', "mari.examples.mGo_Shortcut_Actions.syncChannels()")
-	mari.menus.addAction(action2, UI_path)
+	action2 = Mari.actions.create('Synchronize Channels Selected', "Mari.Scripts.mGo_Shortcut_Actions.syncChannels()")
+	Mari.menus.addAction(action2, UI_path)
 	action2.setShortcut('Shift+5') #win
 	action2.setShortcut('Shift+%') #linux compatibility
 
-	action3 = mari.actions.create('Isolate Current Shader(Layered)', "mari.examples.mGo_Shortcut_Actions.isolateCurrentShader()")
-	mari.menus.addAction(action3, UI_path)
+	action3 = Mari.actions.create('Isolate Current Shader(Layered)', "Mari.Scripts.mGo_Shortcut_Actions.isolateCurrentShader()")
+	Mari.menus.addAction(action3, UI_path)
 	action3.setShortcut('Shift+6') #win can't have the linux compatibility here because that would fall into a character that python recognize as a symbol so the script would not be compiled.
 
-	action4 = mari.actions.create('Isolate Reset Shaders(Layered)', "mari.examples.mGo_Shortcut_Actions.isolateReset()")
-	mari.menus.addAction(action4, UI_path)
+	action4 = Mari.actions.create('Isolate Reset Shaders(Layered)', "Mari.Scripts.mGo_Shortcut_Actions.isolateReset()")
+	Mari.menus.addAction(action4, UI_path)
 	action4.setShortcut('Shift+7') #win
 	action4.setShortcut('Shift+&') #linux compatibility
 
-	action5 = mari.actions.create('mGo Manual - pdf         Shift+8', "mari.examples.mGo_Shortcut_Actions.mGoHelp()")
-	mari.menus.addAction(action5, UI_path)
+	action5 = Mari.actions.create('mGo Manual - pdf         Shift+8', "Mari.Scripts.mGo_Shortcut_Actions.mGoHelp()")
+	Mari.menus.addAction(action5, UI_path)
 	action5.setShortcut('Shift+8') #win
 	action5.setShortcut('Shift+*') #linux compatibility
 
-if mari.app.isRunning():
+if Mari.app.isRunning():
 	_createMenu()

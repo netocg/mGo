@@ -20,7 +20,7 @@
 import mGo_MayaUI; mGo_MayaUI.UI()
 """
 
-import mari
+import Mari
 import os
 import threading
 import subprocess
@@ -37,7 +37,7 @@ widgets = PySide2.QtWidgets
 def printMessage(Str):
     # This method prints to the python console as well as the verbose log
     print(Str)
-    mari.app.log(Str)
+    Mari.app.log(Str)
 
 def run_mGo():
     #External Network Address. Work in any OS!!
@@ -101,7 +101,7 @@ def run_mGo():
 
     #Delete existing palette
     try:
-        mari.palettes.remove("mGo "+IPS[0])
+        Mari.palettes.remove("mGo " + IPS[0])
     except ValueError:
         pass
 
@@ -109,7 +109,7 @@ def run_mGo():
 
     #Create mGo palette, etc
     label = PySide2.QtWidgets.QLabel("mGo "+IPS[0])
-    mGo_palette = mari.palettes.create("mGo "+IPS[0], label)
+    mGo_palette = Mari.palettes.create("mGo " + IPS[0], label)
 
     mGoWindow = widgets.QDialog()
     mGo_palette.setBodyWidget(mGoWindow)
@@ -120,7 +120,7 @@ def run_mGo():
     mGoWindow.setLayout(layout)
 
     #Check for mGo folder and create if necessary
-    mariPath=mari.resources.path('MARI_USER_PATH')
+    mariPath=Mari.resources.path('MARI_USER_PATH')
     mariPath = mariPath.replace( "\\", "/" ).rstrip( "/" )
     mGoDir = mariPath + "/mGo/"
 
@@ -128,9 +128,9 @@ def run_mGo():
     if not os.path.exists(mGoDir):
         os.makedirs(mGoDir)
 
-    #Copy Presets Folder and it's files from Mari/examples/mGo/ to mGoDir
+    #Copy Presets Folder and it's files from Mari/Scripts/mGo/ to mGoDir
     if not os.path.exists(mGoDir+"Presets"):
-        src = mari.resources.path(mari.resources.EXAMPLES) + "/mGo"
+        src = Mari.resources.path(Mari.resources.EXAMPLES) + "/mGo"
         from distutils.dir_util import copy_tree
         copy_tree(src, mariPath+"/mGo")
 
@@ -145,10 +145,10 @@ def run_mGo():
     #Add IP  Button
     addIP_button = widgets.QPushButton()
     addIP_button.setFixedSize(20,20)
-    addIPIcon = gui.QIcon(mari.resources.path(mari.resources.ICONS) + '/Add.16x16.png')
+    addIPIcon = gui.QIcon(Mari.resources.path(Mari.resources.ICONS) + '/Add.16x16.png')
     addIP_button.setIcon(addIPIcon)
     addIP_button.setToolTip("Add New Address")
-    mari.utils.connect(addIP_button.clicked, lambda: addIP())
+    Mari.utils.connect(addIP_button.clicked, lambda: addIP())
 
     #IP Combobox
     IP_combo = widgets.QComboBox()
@@ -176,15 +176,15 @@ def run_mGo():
     except:
         pass
 
-    mari.prefs.set('Scripts/Mari Command Port/port', 6100)
-    if not mari.app.commandPortEnabled():
-        mari.app.enableCommandPort(True)
+    Mari.prefs.set('Scripts/Mari Command Port/port', 6100)
+    if not Mari.app.commandPortEnabled():
+        Mari.app.enableCommandPort(True)
 
     #For safety reasosn start mGo without Network be enabled!
-    mari.prefs.set('Scripts/Mari Command Port/localhostOnly', True)
+    Mari.prefs.set('Scripts/Mari Command Port/localhostOnly', True)
 
     #Check if network got enabled. If not python command above still broken.
-    if mari.prefs.get('Scripts/Mari Command Port/localhostOnly') == True:
+    if Mari.prefs.get('Scripts/Mari Command Port/localhostOnly') == True:
         printMessage("MARI local host Only enabled.")
         IP_combo.setCurrentIndex(IP_combo.findText('Local Host Only'))
     else:
@@ -192,15 +192,15 @@ def run_mGo():
         IP_combo.setCurrentIndex(IP_combo.findText('Network Host'))
 
     IP_combo.setToolTip("Network Address list: "+pathfileHosts)
-    mari.utils.connect(IP_combo.currentIndexChanged['QString'], lambda: NETWORK_Switch())
+    Mari.utils.connect(IP_combo.currentIndexChanged['QString'], lambda: NETWORK_Switch())
 
     #Materialiser Presets Button
     presets_button = widgets.QPushButton()
     presets_button.setFixedSize(28,28)
-    presetsIcon = gui.QIcon(mari.resources.path(mari.resources.ICONS) + '/shaderPresets.png')
+    presetsIcon = gui.QIcon(Mari.resources.path(Mari.resources.ICONS) + '/shaderPresets.png')
     presets_button.setIcon(presetsIcon)
     presets_button.setToolTip("Open Materialiser (Load/Save Material Preset)")
-    mari.utils.connect(presets_button.clicked, lambda: loadMaterialiser())
+    Mari.utils.connect(presets_button.clicked, lambda: loadMaterialiser())
 
     top_layout.addWidget(IP_combo)
     top_layout.addWidget(addIP_button)
@@ -218,12 +218,12 @@ def run_mGo():
     browse_button = widgets.QPushButton()
     browse_button.setFixedSize(28,28)
 
-    bIcon = gui.QIcon(mari.resources.path(mari.resources.ICONS) + '/Folder.png')
+    bIcon = gui.QIcon(Mari.resources.path(Mari.resources.ICONS) + '/Folder.png')
     browse_button.setIcon(bIcon)
 
     middle_Layout.addWidget(browse_line)
     middle_Layout.addWidget(browse_button)
-    mari.utils.connect(browse_button.clicked, lambda: browseForFolder())
+    Mari.utils.connect(browse_button.clicked, lambda: browseForFolder())
     browse_button.setToolTip("Set Project Folder (for Export of Textures and mGo Description File)")
 
     #Middle layout 2
@@ -265,7 +265,7 @@ def run_mGo():
         filter_combo.addItem(f)
 
     filter_combo.setCurrentIndex(filter_combo.findText('Off'))
-    mari.utils.connect(filter_combo.currentIndexChanged['QString'], lambda: showMipmapToolSettings())
+    Mari.utils.connect(filter_combo.currentIndexChanged['QString'], lambda: showMipmapToolSettings())
 
     middle_Layout2.addWidget(fformat_combo)
     middle_Layout2.addWidget(fformat32_combo_text)
@@ -281,32 +281,32 @@ def run_mGo():
     attExportCbox.setToolTip("Export shader ATTRIBUTES")
 
     attExportCbox.setCheckState(PySide2.QtCore.Qt.Checked)
-    attIcon = gui.QIcon(mari.resources.path(mari.resources.ICONS) + '/Attributes.png')
+    attIcon = gui.QIcon(Mari.resources.path(Mari.resources.ICONS) + '/Attributes.png')
     attExportCbox.setIcon(attIcon)
 
     chansExportCbox = widgets.QCheckBox()
     chansExportCbox.setToolTip("Export Texture CHANNELS")
 
     chansExportCbox.setCheckState(PySide2.QtCore.Qt.Checked)
-    chansIcon = gui.QIcon(mari.resources.path(mari.resources.ICONS) + '/Channel.png')
+    chansIcon = gui.QIcon(Mari.resources.path(Mari.resources.ICONS) + '/Channel.png')
     chansExportCbox.setIcon(chansIcon)
 
     objExportCbox = widgets.QCheckBox()
     objExportCbox.setToolTip("Export object GEOMETRY")
 
-    objIcon = gui.QIcon(mari.resources.path(mari.resources.ICONS) + '/Geo.png')
+    objIcon = gui.QIcon(Mari.resources.path(Mari.resources.ICONS) + '/Geo.png')
     objExportCbox.setIcon(objIcon)
 
     camExportCbox = widgets.QCheckBox()
     camExportCbox.setToolTip("Export Mari Perspective CAMERA")
 
-    camIcon = gui.QIcon(mari.resources.path(mari.resources.ICONS) + '/Camera.png')
+    camIcon = gui.QIcon(Mari.resources.path(Mari.resources.ICONS) + '/Camera.png')
     camExportCbox.setIcon(camIcon)
 
     lightsExportCbox = widgets.QCheckBox()
     lightsExportCbox.setToolTip("Export active LIGHTS to Maya scene")
 
-    lightsIcon = gui.QIcon(mari.resources.path(mari.resources.ICONS) + '/Lights.png')
+    lightsIcon = gui.QIcon(Mari.resources.path(Mari.resources.ICONS) + '/Lights.png')
     lightsExportCbox.setIcon(lightsIcon)
     multiExportOptions = ['Selected OBJ', 'Visible OBJ', 'All OBJ', 'Env & Cam']
 
@@ -324,20 +324,20 @@ def run_mGo():
     #Description Export
     descBtn = widgets.QPushButton()
     descBtn.setFixedSize(28,28)
-    descIcon = gui.QIcon(mari.resources.path(mari.resources.ICONS) + '/script.png')
+    descIcon = gui.QIcon(Mari.resources.path(Mari.resources.ICONS) + '/script.png')
     descBtn.setIcon(descIcon)
     descBtn.setToolTip("Export as mGo Description to Project Folder")
 
-    mari.utils.connect(descBtn.clicked, lambda: sceneExport(multiExport_combo.currentText(), "exportDescriptionOnly"))
+    Mari.utils.connect(descBtn.clicked, lambda: sceneExport(multiExport_combo.currentText(), "exportDescriptionOnly"))
 
     #Maya Export
     main_ok_button = widgets.QPushButton()
     main_ok_button.setFixedSize(28,28)
     main_ok_button.setToolTip("Export Checked Items to Maya Scene")
 
-    mari.utils.connect(main_ok_button.clicked, lambda: sceneExport(multiExport_combo.currentText(), "exportLive2Maya"))
+    Mari.utils.connect(main_ok_button.clicked, lambda: sceneExport(multiExport_combo.currentText(), "exportLive2Maya"))
 
-    okIcon = gui.QIcon(mari.resources.path(mari.resources.ICONS) + '/Forward.png')
+    okIcon = gui.QIcon(Mari.resources.path(Mari.resources.ICONS) + '/Forward.png')
     main_ok_button.setIcon(okIcon)
 
     #bottom_layout.addWidget(camExportCbox)
@@ -357,8 +357,8 @@ def run_mGo():
     layout.addRow('8-bit', middle_Layout2)
     layout.addRow(bottom_layout)
 
-    #Default mari export path
-    texPath = mari.resources.path('MARI_DEFAULT_EXPORT_PATH')
+    #Default Mari export path
+    texPath = Mari.resources.path('MARI_DEFAULT_EXPORT_PATH')
     texPath = texPath.replace( "\\", "/" )
 
     browse_line.setText(texPath)
@@ -369,14 +369,14 @@ def run_mGo():
     # <------------------------ mipmapToolSettings UI Start ------------------------>
     #Delete existing palette
     try:
-        mari.palettes.remove("Mipmap Tool Settings")
+        Mari.palettes.remove("Mipmap Tool Settings")
     except ValueError:
         pass
 
     global mipmapToolSettingsWindow
     #Create Tool Settings palette, etc
     label = PySide2.QtWidgets.QLabel("Mipmap Tool Settings")
-    mipmapToolSettings_palette = mari.palettes.create("Mipmap Tool Settings", label)
+    mipmapToolSettings_palette = Mari.palettes.create("Mipmap Tool Settings", label)
 
     mipmapToolSettingsWindow = widgets.QDialog()
     mipmapToolSettings_palette.setBodyWidget(mipmapToolSettingsWindow)
@@ -393,10 +393,10 @@ def run_mGo():
     #Add Tool/Settings Button
     addNewToolSettings_button = widgets.QPushButton()
     addNewToolSettings_button.setFixedSize(20,20)
-    addNewToolSettingsIcon = gui.QIcon(mari.resources.path(mari.resources.ICONS) + '/Add.16x16.png')
+    addNewToolSettingsIcon = gui.QIcon(Mari.resources.path(Mari.resources.ICONS) + '/Add.16x16.png')
     addNewToolSettings_button.setIcon(addNewToolSettingsIcon)
     addNewToolSettings_button.setToolTip("Add a New Settings")
-    mari.utils.connect(addNewToolSettings_button.clicked, lambda: addNewToolSettings())
+    Mari.utils.connect(addNewToolSettings_button.clicked, lambda: addNewToolSettings())
 
     #toolSettings Combobox
     toolSettings_combo = widgets.QComboBox()
@@ -421,11 +421,11 @@ def run_mGo():
     browseMipmapTool_button = widgets.QPushButton()
     browseMipmapTool_button.setFixedSize(28,28)
 
-    btIcon = gui.QIcon(mari.resources.path(mari.resources.ICONS) + '/Lookup.png')
+    btIcon = gui.QIcon(Mari.resources.path(Mari.resources.ICONS) + '/Lookup.png')
     browseMipmapTool_button.setIcon(btIcon)
     browseMipmapTool_button.setToolTip("Set the path to the texture conversion application")
 
-    mari.utils.connect(browseMipmapTool_button.clicked, lambda: browseMipmapTool())
+    Mari.utils.connect(browseMipmapTool_button.clicked, lambda: browseMipmapTool())
 
     middle_Layout.addWidget(toolPath_line)
     middle_Layout.addWidget(browseMipmapTool_button)
@@ -457,10 +457,10 @@ def run_mGo():
     #Save Tool Settings
     saveSettings = widgets.QPushButton("Save Settings")
     saveSettings.setToolTip("Save current settings")
-    saveSettingsIcon = gui.QIcon(mari.resources.path(mari.resources.ICONS) + '/Preference.png')
+    saveSettingsIcon = gui.QIcon(Mari.resources.path(Mari.resources.ICONS) + '/Preference.png')
     saveSettings.setIcon(saveSettingsIcon)
 
-    mari.utils.connect(saveSettings.clicked, lambda: saveToolSettings(""))
+    Mari.utils.connect(saveSettings.clicked, lambda: saveToolSettings(""))
 
     bottom_layout.addWidget(subFolder_line)
     bottom_layout.addWidget(extMipmap_Combo)
@@ -516,11 +516,11 @@ def run_mGo():
         #Confirm Button
         confirmToolNameButton = widgets.QPushButton("OK")
         confirmToolNameButton.setToolTip("Confirm entered name")
-        mari.utils.connect(confirmToolNameButton.clicked, lambda: confirmToolName())
+        Mari.utils.connect(confirmToolNameButton.clicked, lambda: confirmToolName())
 
         #Cancel Button
         cancelToolName = widgets.QPushButton("Cancel")
-        mari.utils.connect(cancelToolName.clicked, lambda: Add_NewToolSettings.close())
+        Mari.utils.connect(cancelToolName.clicked, lambda: Add_NewToolSettings.close())
 
         #Add the widgets to the layouts
         text_layout.addWidget(settingsName_label)
@@ -578,7 +578,7 @@ def run_mGo():
                             return
 
                 #disconnect to avoid spawning msg during populate menu function!
-                mari.utils.disconnect(toolSettings_combo.activated[str], lambda: toolSettings_Switch())
+                Mari.utils.disconnect(toolSettings_combo.activated[str], lambda: toolSettings_Switch())
 
                 toolSettings_combo.addItem(settingsName)
                 toolSettings_combo.setCurrentIndex( toolSettings_combo.findText(settingsName) )
@@ -588,7 +588,7 @@ def run_mGo():
                 #print "Remember to Save Settings after complete the parameters setup."
 
                 #only make this avaliable after populate the menu, cause not, it will spawn twice the switch function!
-                mari.utils.connect(toolSettings_combo.activated[str], lambda: toolSettings_Switch())
+                Mari.utils.connect(toolSettings_combo.activated[str], lambda: toolSettings_Switch())
 
             #close the popup window
             Add_NewToolSettings.close()
@@ -650,13 +650,13 @@ def run_mGo():
         # populate only when the user is Save Settings manually by pressed the Save button after the user had added a new tool through the plus button...
         if projectName == "":
             #disconnect to avoid spawning msg during populate menu function!
-            mari.utils.disconnect(toolSettings_combo.activated[str], lambda: toolSettings_Switch())
+            Mari.utils.disconnect(toolSettings_combo.activated[str], lambda: toolSettings_Switch())
             #update the toolSettings combobox
             toolSettings_combo.clear()
             populateToolSettings_Combobox()
             toolSettings_combo.setCurrentIndex( toolSettings_combo.findText(settingsName) )
             #only make this avaliable after populate the menu, cause not, it will spawn twice the switch function!
-            mari.utils.connect(toolSettings_combo.activated[str], lambda: toolSettings_Switch())
+            Mari.utils.connect(toolSettings_combo.activated[str], lambda: toolSettings_Switch())
 
     #Function to update the UI accordingly to the readed settings for the 'Mipmap Tool Settings' UI
     def toolSettings_Switch():
@@ -681,7 +681,7 @@ def run_mGo():
         #try to load one of the settings accordingly to the current shader.
         shaderType = []
         try:
-            geo = mari.geo.current()
+            geo = Mari.geo.current()
             if geo.currentShader().isLayeredShader():
                 channels = geo.currentShader().channelList()
                 newShader = channels[0].layerList()
@@ -737,7 +737,7 @@ def run_mGo():
     def initialToolSettings():
         #workaround if there is no project opened!
         try:
-            projNameStr = str(mari.projects.current().name())
+            projNameStr = str(Mari.projects.current().name())
         except:
             projNameStr = "none"
 
@@ -802,7 +802,7 @@ def run_mGo():
             #call the function to read the file with default tool settings
             readToolSettings()
             #only make this avaliable after populate the menu, cause not, it will spawn twice the switch function!
-            mari.utils.connect(toolSettings_combo.activated[str], lambda: toolSettings_Switch())
+            Mari.utils.connect(toolSettings_combo.activated[str], lambda: toolSettings_Switch())
         else:
             #call the function to populate the combobox first
             populateToolSettings_Combobox()
@@ -828,14 +828,14 @@ def run_mGo():
                         extMipmap_Combo.setCurrentIndex( extMipmap_Combo.findText(extMipmap) )
                         #only make this avaliable after populate the menu, cause not, it will spawn twice the switch function!
                         #comboBox.connect(comboBox,SIGNAL("currentIndexChanged(int)"), window,SLOT("onIndexChange(int)"))
-                        mari.utils.connect(toolSettings_combo.activated[str], lambda: toolSettings_Switch())
+                        Mari.utils.connect(toolSettings_combo.activated[str], lambda: toolSettings_Switch())
                         return
 
             #if after the loop couldn't find a project name in the log of the 'toolSettings' file that matches the current project opened,
             #call the function to read the file with default tool settings
             readToolSettings()
             #only make this avaliable after populate the menu, cause not, it will spawn twice the switch function!
-            mari.utils.connect(toolSettings_combo.activated[str], lambda: toolSettings_Switch())
+            Mari.utils.connect(toolSettings_combo.activated[str], lambda: toolSettings_Switch())
 
     #Function to show the 'Mipmap Tool Settings' UI
     def showMipmapToolSettings():
@@ -865,24 +865,24 @@ def run_mGo():
 
         #print "Trying to switch to Address: '" + mayaHost + "'"
         #Set port 6100 just for sake and enable the Command Port
-        mari.prefs.set('Scripts/Mari Command Port/port', 6100)
-        if not mari.app.commandPortEnabled():
-            mari.app.enableCommandPort(True)
+        Mari.prefs.set('Scripts/Mari Command Port/port', 6100)
+        if not Mari.app.commandPortEnabled():
+            Mari.app.enableCommandPort(True)
 
         #Check Network Statement
         if str(IP_combo.currentText()) == "Local Host Only":
             #Tick the localhostOnly option to disable the Network Connection
-            mari.prefs.set('Scripts/Mari Command Port/localhostOnly', True)
+            Mari.prefs.set('Scripts/Mari Command Port/localhostOnly', True)
             printMessage("MARI local host Only enabled.")
 
         elif str(IP_combo.currentText()) == "Network Host":
             #Untick the localhostOnly option to disable the Network Connection
-            mari.prefs.set('Scripts/Mari Command Port/localhostOnly', False)
+            Mari.prefs.set('Scripts/Mari Command Port/localhostOnly', False)
             printMessage("MARI Network Command Port activated.")
 
         else:
             #Untick the localhostOnly option to disable the Network Connection
-            mari.prefs.set('Scripts/Mari Command Port/localhostOnly', False)
+            Mari.prefs.set('Scripts/Mari Command Port/localhostOnly', False)
             #Check if it worked. Else python command above still broken, report to the user.
             printMessage("MARI Network Command Port activated.")
 
@@ -911,15 +911,15 @@ def run_mGo():
 
         #Confirm Button
         confirmAddressButton = widgets.QPushButton("OK")
-        confirmAddress_icon = gui.QIcon(mari.resources.path(mari.resources.ICONS) + '/CommandPort.png')
+        confirmAddress_icon = gui.QIcon(Mari.resources.path(Mari.resources.ICONS) + '/CommandPort.png')
         confirmAddressButton.setIcon(confirmAddress_icon)
         confirmAddressButton.setToolTip("Confirm entered address")
-        mari.utils.connect(confirmAddressButton.clicked, lambda: confirmAddress())
+        Mari.utils.connect(confirmAddressButton.clicked, lambda: confirmAddress())
 
         #Cancel Button
         cancelAddress = widgets.QPushButton("Cancel")
         cancelAddress.setFixedSize(77,28)
-        mari.utils.connect(cancelAddress.clicked, lambda: Add_IP.close())
+        Mari.utils.connect(cancelAddress.clicked, lambda: Add_IP.close())
 
         #Add the widgets to the layouts
         text_layout.addWidget(address_text)
@@ -1000,7 +1000,7 @@ def run_mGo():
         with open(log_pathfile) as rd:
             for line in rd:
                 projNameLog = line.split("Project Name:", 1)[1].split(",", 1)[0]
-                if projNameLog == mari.projects.current().name():
+                if projNameLog == Mari.projects.current().name():
                     mayaHostLog = line.split("MAYA Host:", 1)[1].split(",", 1)[0]
                     IP_combo.setCurrentIndex( IP_combo.findText(mayaHostLog) )
 
@@ -1117,12 +1117,12 @@ def run_mGo():
             _HASHDATA = []
             #The first time you got in here store the strings related to Colorspace settings.
             if metadataIndex == 0:
-                _HASHDATA.append( channel.colorspaceConfig().resolveColorspace(mari.ColorspaceConfig.ColorspaceStage.COLORSPACE_STAGE_NATIVE) )
-                _HASHDATA.append( channel.colorspaceConfig().resolveColorspace(mari.ColorspaceConfig.ColorspaceStage.COLORSPACE_STAGE_OUTPUT) )
-                _HASHDATA.append( channel.colorspaceConfig().resolveColorspace(mari.ColorspaceConfig.ColorspaceStage.COLORSPACE_STAGE_WORKING) )
-                _HASHDATA.append( channel.scalarColorspaceConfig().resolveColorspace(mari.ColorspaceConfig.ColorspaceStage.COLORSPACE_STAGE_NATIVE) )
-                _HASHDATA.append( channel.scalarColorspaceConfig().resolveColorspace(mari.ColorspaceConfig.ColorspaceStage.COLORSPACE_STAGE_OUTPUT) )
-                _HASHDATA.append( channel.scalarColorspaceConfig().resolveColorspace(mari.ColorspaceConfig.ColorspaceStage.COLORSPACE_STAGE_WORKING) )
+                _HASHDATA.append(channel.colorspaceConfig().resolveColorspace(Mari.ColorspaceConfig.ColorspaceStage.COLORSPACE_STAGE_NATIVE))
+                _HASHDATA.append(channel.colorspaceConfig().resolveColorspace(Mari.ColorspaceConfig.ColorspaceStage.COLORSPACE_STAGE_OUTPUT))
+                _HASHDATA.append(channel.colorspaceConfig().resolveColorspace(Mari.ColorspaceConfig.ColorspaceStage.COLORSPACE_STAGE_WORKING))
+                _HASHDATA.append(channel.scalarColorspaceConfig().resolveColorspace(Mari.ColorspaceConfig.ColorspaceStage.COLORSPACE_STAGE_NATIVE))
+                _HASHDATA.append(channel.scalarColorspaceConfig().resolveColorspace(Mari.ColorspaceConfig.ColorspaceStage.COLORSPACE_STAGE_OUTPUT))
+                _HASHDATA.append(channel.scalarColorspaceConfig().resolveColorspace(Mari.ColorspaceConfig.ColorspaceStage.COLORSPACE_STAGE_WORKING))
             else:
                 #Second time or more you got in here? Get channels HASH.
                 _uvIndex = int(uvIndex)
@@ -1336,7 +1336,7 @@ def run_mGo():
                                 countUndo += 3
                                 i =0
                                 while i < countUndo:
-                                    mari.history.undo()
+                                    Mari.history.undo()
                                     i +=1
 
                                 #Convert Exported Mask to Mipmap
@@ -2434,7 +2434,7 @@ def run_mGo():
 
     # Call the many Export options such as Geo, Channels, Attributes, Shaders or Env/Cam
     def sceneExport(multiGeoExportCbox, exportOption):
-        if mari.projects.current() == None:
+        if Mari.projects.current() == None:
             printMessage("Please open a project first.")
             return
 
@@ -2484,7 +2484,7 @@ def run_mGo():
 
         #Scene Descriptions Directory
         global sceneDescriptionsDir
-        sceneDescriptionsDir = exportDir + "mGo_" + mari.projects.current().name() + "_Description/"
+        sceneDescriptionsDir = exportDir + "mGo_" + Mari.projects.current().name() + "_Description/"
         if not os.path.exists(sceneDescriptionsDir):
             os.makedirs(sceneDescriptionsDir)
 
@@ -2492,9 +2492,9 @@ def run_mGo():
         if multiGeoExportCbox == "Selected OBJ":
             #Export checked items DATA from selected GEO
             printMessage("Export method: Selected OBJ")
-            geo = mari.geo.current()
+            geo = Mari.geo.current()
             if geo == None:
-                printMessage("ERROR - '" +mari.geo.currentLocator().name()+ "' is currently selected. Please select a Non-Locator Geo in order to export data from a single OBJ.")
+                printMessage("ERROR - '" + Mari.geo.currentLocator().name() + "' is currently selected. Please select a Non-Locator Geo in order to export data from a single OBJ.")
             else:
                 #Export single SHADER selected
                 curShader = geo.currentShader()
@@ -2505,7 +2505,7 @@ def run_mGo():
             #Export checked items DATA from visible geo.
             printMessage("Export method: Visible OBJ")
             configData = []
-            for geo in mari.geo.list():
+            for geo in Mari.geo.list():
                 if geo.isVisible():
                     curShader = geo.currentShader()
                     configData.append(str(go(exportOption, geo, curShader)))
@@ -2520,7 +2520,7 @@ def run_mGo():
             #Export checked items DATA from Everything
             printMessage("Export method: All OBJ")
             configData = []
-            for geo in mari.geo.list():
+            for geo in Mari.geo.list():
                 try:
                     curShader = geo.currentShader()
                     configData.append(str(go(exportOption, geo, curShader)))
@@ -2535,7 +2535,7 @@ def run_mGo():
 
         else:
             printMessage("Export method: EnvHDR&Cam")
-            geo = mari.geo.current()
+            geo = Mari.geo.current()
             curShader = geo.currentShader()
             shaderType = []
             if curShader.isLayeredShader():
@@ -2561,7 +2561,7 @@ def run_mGo():
                 #Light DATA
                 exportLights = "True"
                 envLight_data = []
-                for light in mari.lights.list():
+                for light in Mari.lights.list():
                     visibility = "hidden"
                     if light.isOn():
                         visibility = "visible"
@@ -2570,7 +2570,7 @@ def run_mGo():
                         HDR_File_path = str(light.cubeImageFilename())
                         # In case it is an image in the Mari's root directory then we have to re-path it so Maya can understand the strings and vars
                         try:
-                            mari_root_dir = str(mari.__path__).lstrip("['")
+                            mari_root_dir = str(Mari.__path__).lstrip("['")
                             mari_root_dir = mari_root_dir.rsplit('/Media', 1)[0]
                             HDR_File_path = HDR_File_path.replace("$INSTALL", mari_root_dir,1)
                         except:
@@ -2590,7 +2590,7 @@ def run_mGo():
                 #Camera DATA
                 cam_data = "none"
                 exportCam = "True"
-                canvas = mari.canvases.current()
+                canvas = Mari.canvases.current()
                 if canvas is None:
                     printMessage("WARNING - No canvas selected!")
 
@@ -2647,7 +2647,7 @@ def run_mGo():
                 t1.join()
 
         # <------------------------ Log sceneDescription path ------------------------>
-        projName = "Project Name:"+str(mari.projects.current().name())+", "
+        projName = "Project Name:" + str(Mari.projects.current().name()) + ", "
         mGo_Settings = "MAYA Host:"+str(IP_combo.currentText())+", "
         mGo_Settings += "Output Folder:"+exportDir+", "
         mGo_Settings +="8-bits:"+ext8+", "
@@ -2668,7 +2668,7 @@ def run_mGo():
                 for line in rd:
                     #Keep any lines that are not related to the current Mari project.
                     projNameLog = line.split("Project Name:", 1)[1].split(",", 1)[0]
-                    if str(mari.projects.current().name()) != projNameLog:
+                    if str(Mari.projects.current().name()) != projNameLog:
                         logLines.append(line)
 
                 #after the loop append the current mGo settings related to the opened project.
@@ -2708,12 +2708,12 @@ def run_mGo():
             except socket.error:
                 printMessage("--- ALERT --- You must have to open Maya's port 6010 first!")
                 #'\n' command does not work here! Have to manully space out phrases to get a proper line break.
-                message = mari.actions.create('open port', 'mari.utils.message("Scene Description & Shader Data saved in the mGo Folder.                                                 If you want to automate the Maya import process make sure port 6010 is open in Maya - See Instructions for Help.")')
+                message = Mari.actions.create('open port', 'Mari.utils.message("Scene Description & Shader Data saved in the mGo Folder.                                                 If you want to automate the Maya import process make sure port 6010 is open in Maya - See Instructions for Help.")')
                 message.trigger()
 
         #In case using Mipmap as filtering call the function to save the 'Mipmap Tool Settings' after everything got exported.
         if str(filter_combo.currentText()) == "Mipmap":
-            saveToolSettings( mari.projects.current().name() )
+            saveToolSettings(Mari.projects.current().name())
         #all's well that ends well
         printMessage("------------- finished -------------")
     # <------------------------ Main mGo Function end ------------------------>
@@ -2721,7 +2721,7 @@ def run_mGo():
     def loadMaterialiser():
         from . import mGo_Materialiser
         reload(mGo_Materialiser)
-        mari.examples.mGo_Materialiser.runMaterialiser()
+        Mari.examples.mGo_Materialiser.runMaterialiser()
 
 
 #------------------------------------------------------------
@@ -2729,7 +2729,7 @@ def run_mGo():
 def getProjects(mayaHost, mGoPath):
     mariProjs=[]
 
-    for project in mari.projects.names():
+    for project in Mari.projects.names():
         mariProjs.append(project)
     mariProjs=str(mariProjs)
 
@@ -2744,7 +2744,7 @@ def getProjects(mayaHost, mGoPath):
         maya.send(command.encode())
         #try to get the name of the current project open in Mari.
         try:
-            curProj = mari.projects.current().name()
+            curProj = Mari.projects.current().name()
             #print in Maya the current opened Mari project
             command = 'print "Current opened project at Mari: " + "%s"' % curProj
             maya.send(command.encode())
@@ -2767,8 +2767,8 @@ def importGEO(sendMode, projectName, nameSpace, groups, FilePath, setR, sd, isAn
             for myObj in myObjList:
                 if myObj == _myFileName.rsplit("_v0", 1)[0]:
                     try:
-                        mari.geo.setCurrent(myObj)
-                        geo = mari.geo.current()
+                        Mari.geo.setCurrent(myObj)
+                        geo = Mari.geo.current()
                         verName = _myFileName
                         if (shadersOnly != "True"):
                             _options = {'MergeType':1, 'CreateSelectionSets':1, 'MergeSelectionGroupWithSameNameType':1}
@@ -2804,11 +2804,11 @@ def importGEO(sendMode, projectName, nameSpace, groups, FilePath, setR, sd, isAn
                 return
 
         else:
-            #at the moment it's cumbersome try to avoid import the same geo multiple times. What mari does is rename it to geoName_1, geoName_2...
+            #at the moment it's cumbersome try to avoid import the same geo multiple times. What Mari does is rename it to geoName_1, geoName_2...
             #load grouped meshs as grouped GEOS under a single locator.
             if groups != "":
                 # seek if locator doesn't exist.
-                locatorList = mari.geo.listLocators()
+                locatorList = Mari.geo.listLocators()
                 locatorParent = []
 
                 groupNames = groups.rsplit("|")
@@ -2818,7 +2818,7 @@ def importGEO(sendMode, projectName, nameSpace, groups, FilePath, setR, sd, isAn
                     groupName = _groupName
                     locatorExist = False
                     for locator in locatorList:
-                        if mari.LocatorEntity.name(locator) == _groupName:
+                        if Mari.LocatorEntity.name(locator) == _groupName:
                             locatorExist = True
                             locator.setSelected(True)
                             locatorParent = locator
@@ -2830,15 +2830,15 @@ def importGEO(sendMode, projectName, nameSpace, groups, FilePath, setR, sd, isAn
 
                     #There is no locator found in Mari, create a new one
                     if locatorParent == []:
-                        mari.geo.addLocator().setName(groupName)
-                        locatorParent = mari.geo.listLocators()[-1]
+                        Mari.geo.addLocator().setName(groupName)
+                        locatorParent = Mari.geo.listLocators()[-1]
                 #load the geo under the parent locator
-                geo = mari.geo.load(FilePath, options, objects_to_load, True)
+                geo = Mari.geo.load(FilePath, options, objects_to_load, True)
             else:
                 #load ungrouped meshs as separeted GEOS
-                geo = mari.geo.load(FilePath, options, objects_to_load, False)
+                geo = Mari.geo.load(FilePath, options, objects_to_load, False)
 
-            geo = mari.geo.current()
+            geo = Mari.geo.current()
             geo.renameVersion(geo.name(), _myFileName)
             geo.setName(_myFileName.rsplit("_v0", 1)[0])
             printMessage("'" +geo.name()+ "' Object Added.")
@@ -2852,7 +2852,7 @@ def importGEO(sendMode, projectName, nameSpace, groups, FilePath, setR, sd, isAn
             geo.setMetadataEnabled("namespace", False)
 
 
-        geo = mari.geo.current()
+        geo = Mari.geo.current()
         #setup subdivs in Mari
         sd_method = meshData.split("sd_method:", 1)[1].split(",", 1)[0]
         sd_boundary = meshData.split("sd_boundary:", 1)[1].split(",", 1)[0]
@@ -2873,27 +2873,27 @@ def importGEO(sendMode, projectName, nameSpace, groups, FilePath, setR, sd, isAn
         if sendShader == "True" and shader_file != "none":
             from . import mGo_Materialiser
             reload(mGo_Materialiser)
-            mari.examples.mGo_Materialiser.importShader(_myFileName.rsplit("_v0", 1)[0], shader_file, _sendMode)
+            Mari.examples.mGo_Materialiser.importShader(_myFileName.rsplit("_v0", 1)[0], shader_file, _sendMode)
 
         #manual way to focus camera on Obj (is there a 'focus' command in Mari?)
         """
-        canvas = mari.canvases.current()
+        canvas = Mari.canvases.current()
         camera = canvas.camera()
         bb=geo.boundingSphereCenter()
         bb=bb.asTuple()
         objX= bb[0]
         objY= bb[1]
         objZ= bb[2]
-        camera.setLookAt( mari.VectorN(objX,objY,objZ) )
+        camera.setLookAt( Mari.VectorN(objX,objY,objZ) )
         """
         return
 
 
     #Deal with Multiple objects list
     myObjList = myObjList.strip("[").replace("u'", "").replace("'", "").replace(",", "").strip("]").split(" ")
-    objects_to_load=[{"/":mari.geo.GEOMETRY_IMPORT_DONT_MERGE_CHILDREN}]
-    selectionSetsFromFaces = [{"/":mari.geo.SELECTION_GROUPS_CREATE_FROM_FACE_GROUPS}]
-    selectionGroups = [{"/":mari.geo.MERGESELECTIONGROUP_MERGE_SELECTIONGROUP_HAVING_SAME_NAME}]
+    objects_to_load=[{"/":Mari.geo.GEOMETRY_IMPORT_DONT_MERGE_CHILDREN}]
+    selectionSetsFromFaces = [{"/":Mari.geo.SELECTION_GROUPS_CREATE_FROM_FACE_GROUPS}]
+    selectionGroups = [{"/":Mari.geo.MERGESELECTIONGROUP_MERGE_SELECTIONGROUP_HAVING_SAME_NAME}]
     for geoParts in myObjList:
         #print geoParts
         #split namespaces.
@@ -2903,13 +2903,13 @@ def importGEO(sendMode, projectName, nameSpace, groups, FilePath, setR, sd, isAn
 
     channel_properties = []
     if setR=="1k":
-        channel_properties = [mari.ChannelInfo("diffuse", mari.ImageSet.SIZE_1024, mari.ImageSet.SIZE_1024, mari.Image.DEPTH_BYTE, mari.Color(0.5,0.5,0.5), mari.Image.FILESPACE_NORMAL)]
+        channel_properties = [Mari.ChannelInfo("diffuse", Mari.ImageSet.SIZE_1024, Mari.ImageSet.SIZE_1024, Mari.Image.DEPTH_BYTE, Mari.Color(0.5, 0.5, 0.5), Mari.Image.FILESPACE_NORMAL)]
     elif setR=="2k":
-        channel_properties = [mari.ChannelInfo("diffuse", mari.ImageSet.SIZE_2048, mari.ImageSet.SIZE_2048, mari.Image.DEPTH_BYTE, mari.Color(0.5,0.5,0.5), mari.Image.FILESPACE_NORMAL)]
+        channel_properties = [Mari.ChannelInfo("diffuse", Mari.ImageSet.SIZE_2048, Mari.ImageSet.SIZE_2048, Mari.Image.DEPTH_BYTE, Mari.Color(0.5, 0.5, 0.5), Mari.Image.FILESPACE_NORMAL)]
     elif setR=="4k":
-        channel_properties = [mari.ChannelInfo("diffuse", mari.ImageSet.SIZE_4096, mari.ImageSet.SIZE_4096, mari.Image.DEPTH_BYTE, mari.Color(0.5,0.5,0.5), mari.Image.FILESPACE_NORMAL)]
+        channel_properties = [Mari.ChannelInfo("diffuse", Mari.ImageSet.SIZE_4096, Mari.ImageSet.SIZE_4096, Mari.Image.DEPTH_BYTE, Mari.Color(0.5, 0.5, 0.5), Mari.Image.FILESPACE_NORMAL)]
     elif setR=="8k":
-        channel_properties = [mari.ChannelInfo("diffuse", mari.ImageSet.SIZE_8192, mari.ImageSet.SIZE_8192, mari.Image.DEPTH_BYTE, mari.Color(0.5,0.5,0.5), mari.Image.FILESPACE_NORMAL)]
+        channel_properties = [Mari.ChannelInfo("diffuse", Mari.ImageSet.SIZE_8192, Mari.ImageSet.SIZE_8192, Mari.Image.DEPTH_BYTE, Mari.Color(0.5, 0.5, 0.5), Mari.Image.FILESPACE_NORMAL)]
 
     objects_to_load=[{}]
     options = {'MergeType':1, 'CreateSelectionSets':1, 'MergeSelectionGroupWithSameNameType':1, 'CreateChannels':channel_properties}
@@ -2919,37 +2919,37 @@ def importGEO(sendMode, projectName, nameSpace, groups, FilePath, setR, sd, isAn
 
     #create a new Mari Project with Object
     if sendMode=="1":
-        #close and create new mari project
-        while (mari.projects.current() != None):
-            mari.projects.close()
+        #close and create new Mari project
+        while (Mari.projects.current() != None):
+            Mari.projects.close()
 
         #Workaround for Create a project with multiple GEO underneath a locator!
         #create the project with simple geo cube that is located at Mari ROOT folder
-        mariCubeGEO = mari.resources.path(mari.resources.EXAMPLES)+"/Objects/cube.obj"
-        #mari.projects.create(projectName, FilePath, channel_properties)
-        if (mari.projects.current() == None):
-            mari.projects.create(projectName, mariCubeGEO, channel_properties)
-            mari.current.geo().setName("initial_project_creation")
-            mari.current.geo().hide()
-            mari.selection_groups.removeSelectionGroup(mari.selection_groups.list()[0])
+        mariCubeGEO = Mari.resources.path(Mari.resources.EXAMPLES) + "/Objects/cube.obj"
+        #Mari.projects.create(projectName, FilePath, channel_properties)
+        if (Mari.projects.current() == None):
+            Mari.projects.create(projectName, mariCubeGEO, channel_properties)
+            Mari.current.geo().setName("initial_project_creation")
+            Mari.current.geo().hide()
+            Mari.selection_groups.removeSelectionGroup(Mari.selection_groups.list()[0])
         else:
             #now you can import multiple GEO as separeted pieces.
             geoLoad(sendMode, options, sd, objects_to_load, nameSpace)
             #remove the first geo that was created with the project
-            #mari.geo.remove(_myFileName+"_Merged")
+            #Mari.geo.remove(_myFileName+"_Merged")
 
     else:
         #Add Object or Obj Version
         #check if a different project is open before send geo, if so close it!
-        if (mari.projects.current() != None):
-            if (mari.projects.current().name() != projectName):
-                while (mari.projects.current() != None):
-                    mari.projects.close()
+        if (Mari.projects.current() != None):
+            if (Mari.projects.current().name() != projectName):
+                while (Mari.projects.current() != None):
+                    Mari.projects.close()
 
         #try to open the project name, and only then add the geo.
-        if (mari.projects.current() == None):
+        if (Mari.projects.current() == None):
             try:
-                mari.projects.open(projectName)
+                Mari.projects.open(projectName)
             except:
                 printMessage("ERROR - The project does not exist!")
                 return
@@ -2962,7 +2962,7 @@ def importGEO(sendMode, projectName, nameSpace, groups, FilePath, setR, sd, isAn
 
     #try to clean-up any initial GEO created.
     try:
-        mari.geo.remove("initial_project_creation")
+        Mari.geo.remove("initial_project_creation")
     except:
         pass
 
@@ -2973,15 +2973,15 @@ def importGEO(sendMode, projectName, nameSpace, groups, FilePath, setR, sd, isAn
 #import CAM from Maya to Mari
 def importCAM(projectName, startTime, endTime, camFileName):
     #check if a different project is open, if so close it first
-    if (mari.projects.current() != None):
-        if (mari.projects.current().name() != projectName):
-            while (mari.projects.current() != None):
-                mari.projects.close()
+    if (Mari.projects.current() != None):
+        if (Mari.projects.current().name() != projectName):
+            while (Mari.projects.current() != None):
+                Mari.projects.close()
 
     #try to open the project name
-    if (mari.projects.current() == None):
+    if (Mari.projects.current() == None):
         try:
-            mari.projects.open(projectName)
+            Mari.projects.open(projectName)
         except:
             printMessage("ERROR - The project does not exist!")
             return
@@ -2990,7 +2990,7 @@ def importCAM(projectName, startTime, endTime, camFileName):
     options = ["FrameOffset = 0", startTime, endTime]
     #camerasToLoad = "/"+camera_names.rsplit("|", 1)[-1]
     try:
-        mari.projectors.load(camFileName, options)
+        Mari.projectors.load(camFileName, options)
     except:
         pass
 
